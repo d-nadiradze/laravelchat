@@ -2,7 +2,7 @@
 @section('content')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
-    {{-- gitze gak ? ara--}}
+    {{-- gitze gak ? arminda es gitze prosta proeqti vnaxd da imis garcheva n--}}
     <div class="container spark-screen">
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
