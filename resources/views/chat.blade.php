@@ -2,7 +2,6 @@
 @section('content')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
-    {{-- gitze gak ? arminda es gitze prosta proeqti vnaxd da imis garcheva n--}}
     <div class="container spark-screen">
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
@@ -19,7 +18,7 @@
                                     <input type="hidden" name="user" value="{{ Auth::user()->name }}" >
                                     <textarea class="form-control message"></textarea>
                                     <br/>
-                                    <button  class="btn btn-success" id="send-message">send</button>
+                                    <input type="button" value="Send" class="btn btn-success" id="send-message">
                                 </form>
                             </div>
                         </div>
@@ -29,12 +28,7 @@
         </div>
     </div>
     <script>
-        var socket = io.connect('http://localhost:6379',{ transports : ['websocket'] });
-
-        socket.on("connect_error", (err) => {
-            console.log(`connect_error due to ${err.message}`);
-        });
-
+        var socket = io.connect('http://localhost:8890');
         socket.on('message', function (data) {
             data = jQuery.parseJSON(data);
             $( "#messages" ).append( "<strong>"+data.user+":</strong><p>"+data.message+"</p>" );

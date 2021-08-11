@@ -1,12 +1,10 @@
-var app = require('express'); //es raari expresii :D istarteba ase ? e
-var server = require('http').createServer(app);
+var app = require('express')();
+var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
-/**
- * sxva filebi sadaa ra failebi chatis
- */
-server.listen(6379);
-io.on('connection', function (socket) { //save
+
+server.listen(8890);
+io.on('connection', function (socket) {
 
     console.log("client connected");
     var redisClient = redis.createClient();
@@ -19,5 +17,4 @@ io.on('connection', function (socket) { //save
     socket.on('disconnect', function() {
         redisClient.quit();
     });
-
 });

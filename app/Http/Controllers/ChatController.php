@@ -14,8 +14,9 @@ class ChatController extends Controller
         $this->middleware('guest');
     }
 
-    public function sendMessage(Request $request)
+    public function sendMessage($request)
     {
+
         $redis = PRedis::connection();
 
         $data = ['message' => Request::input('message'), 'user' => Request::input('user')];
