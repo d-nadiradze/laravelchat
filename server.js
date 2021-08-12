@@ -1,20 +1,17 @@
-var app = require('express')();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
-var redis = require('redis');
+let server = require('http').Server();
+let socket = require('socket.io')(server);
+redis = new require('ioredis')();
 
-server.listen(8890);
-io.on('connection', function (socket) {
+server.listen(8890)
+console.log('Server started');
 
-    console.log("client connected");
-    var redisClient = redis.createClient();
-    redisClient.subscribe('message');
+socket.on('connection',function(io) {
 
-    redisClient.on("message", function(channel, data) {
-        socket.emit(channel, data);
-    });
+    console.log('Successfully connected');
+    redis.subscribe('chat_app:channel');
 
-    socket.on('disconnect', function() {
-        redisClient.quit();
+    redis.on("message", function(channel, data) {
+        io.emit('chat_message',data);
     });
 });
+

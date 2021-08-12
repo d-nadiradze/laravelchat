@@ -6,6 +6,7 @@
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
                 <div class="panel panel-default">
+                    @auth
                     <div class="panel-heading">Chat Message Module</div>
                     <div class="panel-body">
                         <div class="row">
@@ -23,13 +24,15 @@
                             </div>
                         </div>
                     </div>
+                        @endauth
                 </div>
             </div>
         </div>
     </div>
     <script>
-        var socket = io.connect('http://localhost:8890');
-        socket.on('message', function (data) {
+        var socket = io.connect('http://localhost:8890', {transports : ['websocket'] });
+        socket.on('chat_message', function (data) {
+            console.log(data);
             data = jQuery.parseJSON(data);
             $( "#messages" ).append( "<strong>"+data.user+":</strong><p>"+data.message+"</p>" );
         });
