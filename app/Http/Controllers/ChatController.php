@@ -12,8 +12,11 @@ use App\Http\Controllers\Controller;
 
 class ChatController extends Controller
 {
-    public function show(){
-        return view('chat', ['message' => Message::all(),'current' => [Auth::user()]]);
+    public function show()
+    {
+        $s = Message::all()->toArray();
+
+        return view('chat', ['message' => array_reverse(array_chunk($s,20)), 'current' => [Auth::user()]]);
     }
 
     public function __construct()
@@ -28,11 +31,12 @@ class ChatController extends Controller
         $message->message = $request->input('message');
         $message->save();
         $data = ['message' => $request->input('message'), 'user' => $request->input('user')];
-
-       Redis::publish('channel', json_encode($data));
-
+        Redis::publish('channel', json_encode($data));
         return response()->json(['success' => true]);
+    }
 
-
+    public function fetchMessages()
+    {
+        return array_chunk(Message::all()->toArray(),20);
     }
 }

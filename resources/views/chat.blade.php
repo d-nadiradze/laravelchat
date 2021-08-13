@@ -37,50 +37,55 @@
 </style>
 
 <div class="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
-    <div id="messages"
+    <div id="chat"
          class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
 
-        <ul>
-
+        <ul id="sms">
             @if($message)
 
-                @foreach($message as $messages)
-                    @if($messages->username == Auth::user()->name)
-                        <li>
+                @foreach( $message[0] as $messages)
+                    @if($messages['username']== Auth::user()->name)
+                        <li class="send">
                             <div class="chat-message mt-3">
-                                <div class="text-gray-500 text-xs ml-11">{{$messages->username}}</div>
+                                <div class="text-gray-500 text-xs ml-11">{{$messages['username']}}</div>
                                 <div class="flex items-end">
                                     <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-                                        <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{{$messages->message}}</span></div>
+                                        <div><span
+                                                class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{{$messages['message']}}</span>
+                                        </div>
                                     </div>
-                                    <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="My profile" class="w-6 h-6 rounded-full order-1">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
+                                        alt="My profile" class="w-6 h-6 rounded-full order-1">
                                 </div>
                             </div>
                         </li>
                     @else
-                        <li>
-                        <div class='chat-message mt-3'>
-                            <div class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">{{$messages->username}}</div>
-                            <div class='flex items-end justify-end'>
-                                <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>
-                                    <div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
-                                    {{$messages->message}}
+                        <li class="send">
+                            <div class='chat-message mt-3'>
+                                <div
+                                    class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">{{$messages['username']}}</div>
+                                <div class='flex items-end justify-end'>
+                                    <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>
+                                        <div
+                                            class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
+                                            {{$messages['message']}}
+                                        </div>
                                     </div>
-                                </div>
-                                <img src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="My profile" class="w-6 h-6 rounded-full order-2">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
+                                        alt="My profile" class="w-6 h-6 rounded-full order-2">
                                 </div>
                             </div>
                         </li>
                     @endif
                 @endforeach
 
-                @else
+            @else
                 <li class="sms"></li>
-                <li class="sms-other"></li>
             @endif
 
-            <li class="sms"></li>
-            <li class="sms-other"></li>
+
         </ul>
 
     </div>
@@ -112,8 +117,6 @@
 
 <script>
 
-    const el = document.getElementById('messages')
-    el.scrollTop = el.scrollHeight
 
     var socket = io.connect('http://localhost:3000', {transports: ['websocket']});
     let current = "{{Auth::user()->name}}";
@@ -121,43 +124,44 @@
     socket.on('chat_message', function (data) {
         data = jQuery.parseJSON(data);
         if (data['user'] == current) {
-            $(".sms").append(
-                "<div class='chat-message mt-3'>"+
-                    "<div class='text-gray-500 text-xs ml-11'>"+data.user+"</div>"+
-                    "<div class='flex items-end'>"+
-                        "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start'>"+
-                            "<div>"+"<span class='px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600'>"+ data.message +"</span>"+"</div>"+
-                        "</div>"+
-                        "<img src='https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-1'>"+
-                    "</div>"+
-                "</div>"
+            $("#sms").append(
+                "<li class='send'>"+
+                "<div class='chat-message mt-3'>" +
+                "<div class='text-gray-500 text-xs ml-11'>" + data.user + "</div>" +
+                "<div class='flex items-end'>" +
+                "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start'>" +
+                "<div>" + "<span class='px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600'>" + data.message + "</span>" + "</div>" +
+                "</div>" +
+                "<img src='https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-1'>" +
+                "</div>" +
+                "</div>"+
+                "</li>"
             );
         } else {
-            $(".sms").append(
-                "<div class='chat-message mt-3'>"+
-                    "<div class='text-gray-500 flex flex items-end justify-end mr-11 text-xs'>"+data.user+"</div>"+
-                    "<div class='flex items-end justify-end'>"+
-                        "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>"+
-                            "<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>"+
-                                data.message+
-                            "</div>"+
-                        "</div>"+
-                        "<img src='https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-2'>"+
-                    "</div>"+
-                "</div>"
+            $("#sms").append(
+                "<li class='send'>"+
+                "<div class='chat-message mt-3'>" +
+                "<div class='text-gray-500 flex flex items-end justify-end mr-11 text-xs'>" + data.user + "</div>" +
+                "<div class='flex items-end justify-end'>" +
+                "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>" +
+                "<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>" +
+                data.message +
+                "</div>" +
+                "</div>" +
+                "<img src='https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-2'>" +
+                "</div>" +
+                "</div>"+
+                "</li>"
             );
 
         }
 
-        const el = document.getElementById('messages')
-        el.scrollTop = el.scrollHeight
+
     });
 
 
-    $("#form").ready(function (e) {
-
-        $("#s").keypress(function (e){
-            if(e.which == 13) {
+    $("#s").keypress(function (e) {
+        if (e.which == 13) {
             e.preventDefault();
             var _token = $("input[name='_token']").val();
             var user = $("input[name='user']").val();
@@ -173,29 +177,90 @@
                     }
                 });
             }
-        }})
+        }
+    })
 
-        $("#send-message").click(function (e){
-            e.preventDefault();
-            var _token = $("input[name='_token']").val();
-            var user = $("input[name='user']").val();
-            var message = $("input[name='message']").val();
-            if (message != '') {
-                $.ajax({
-                    type: "POST",
-                    url: '{!! URL::to("sendmessage") !!}',
-                    dataType: "json",
-                    data: {'_token': _token, 'message': message, 'user': user},
-                    success: function (data) {
-                        $("input[name='message']").val('');
-                    }
-                });
-            }
-        })
-
+    $("#send-message").click(function (e) {
+        e.preventDefault();
+        var _token = $("input[name='_token']").val();
+        var user = $("input[name='user']").val();
+        var message = $("input[name='message']").val();
+        if (message != '') {
+            $.ajax({
+                type: "POST",
+                url: '{!! URL::to("sendmessage") !!}',
+                dataType: "json",
+                data: {'_token': _token, 'message': message, 'user': user},
+                success: function (data) {
+                    $("input[name='message']").val('');
+                }
+            });
+        }
 
 
     })
+
+    $(document).ready(function () {
+        $.ajax({
+            method: "GET",
+            url: "/messages",
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            }
+        }).done((r) => {
+                var messagesLength = 0;
+                for (let i=0;i<r.length; i++){
+                    messagesLength+=r[i].length;
+                }
+                $("#chat").scrollTop($("#chat")[0].scrollHeight);
+
+                $('#chat').scroll(function () {
+
+                    setTimeout(function () {
+                        for( let i=r.length-2; i>=0; i--) {
+                            r[i].forEach((data, j) => {
+                                console.log()
+                                if ($('#chat').scrollTop() == 0) {
+                                    if (messagesLength == $('.send').length) {
+                                        console.log('test')
+                                    } else {
+                                        if (data.username == current) {
+                                            $("#sms").prepend( "<li class='send'>"+
+                                                "<div class='chat-message mt-3'>" +
+                                                "<div class='text-gray-500 text-xs ml-11'>" + data.user + "</div>" +
+                                                "<div class='flex items-end'>" +
+                                                "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start'>" +
+                                                "<div>" + "<span class='px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600'>" + data.message + "</span>" + "</div>" +
+                                                "</div>" +
+                                                "<img src='https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-1'>" +
+                                                "</div>" +
+                                                "</div>"+
+                                                "</li>")
+                                        } else {
+                                            $(".sms").prepend(  "<li class='send'>"+
+                                                "<div class='chat-message mt-3'>" +
+                                                "<div class='text-gray-500 flex flex items-end justify-end mr-11 text-xs'>" + data.user + "</div>" +
+                                                "<div class='flex items-end justify-end'>" +
+                                                "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>" +
+                                                "<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>" +
+                                                data.message +
+                                                "</div>" +
+                                                "</div>" +
+                                                "<img src='https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-2'>" +
+                                                "</div>" +
+                                                "</div>"+
+                                                "</li>")
+                                        }
+
+                                    }
+                                }
+                            })
+                        }
+                    },780);
+            })
+        })
+
+    })//
 </script>
 
 </body>
