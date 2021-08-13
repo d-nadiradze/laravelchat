@@ -22,10 +22,8 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-Route::get('/chat',function (){
-    return view('chat',);
-});
-Route::post('sendmessage', [ChatController::class, 'sendMessage'])->name('sendmessage');
+Route::get('/chat', [ChatController::class, 'show'])->middleware(['auth']);
+Route::post('sendmessage', [ChatController::class, 'sendMessage']);
 
 
 require __DIR__.'/auth.php';

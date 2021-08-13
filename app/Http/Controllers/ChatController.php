@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 use PRedis;
 use App\Http\Requests;
@@ -11,6 +12,10 @@ use App\Http\Controllers\Controller;
 
 class ChatController extends Controller
 {
+    public function show(){
+        return view('chat', ['message' => Message::all(),'current' => [Auth::user()]]);
+    }
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -27,5 +32,7 @@ class ChatController extends Controller
        Redis::publish('channel', json_encode($data));
 
         return response()->json(['success' => true]);
+
+
     }
 }
