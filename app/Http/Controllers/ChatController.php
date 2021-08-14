@@ -10,18 +10,22 @@ use App\Http\Requests;
 use App\Models\Message;
 use App\Http\Controllers\Controller;
 
+
 class ChatController extends Controller
 {
-    public function show()
-    {
-        $s = Message::all()->toArray();
 
-        return view('chat', ['message' => array_reverse(array_chunk($s,20)), 'current' => [Auth::user()]]);
-    }
 
-    public function __construct()
+
+
+    public function __construct(Message $message)
     {
         $this->middleware('auth');
+        $this->message = array_reverse($message::all()->toArray());
+    }
+
+    public function show()
+    {
+    return view('chat', ['message' => $this->message, 'current' => [Auth::user()]]);
     }
 
     public function sendMessage(Request $request)
@@ -37,6 +41,6 @@ class ChatController extends Controller
 
     public function fetchMessages()
     {
-        return array_chunk(Message::all()->toArray(),20);
+        return $this->message;
     }
 }

@@ -42,16 +42,15 @@
 
         <ul id="sms">
             @if($message)
-
-                @foreach( $message[0] as $messages)
-                    @if($messages['username']== Auth::user()->name)
+                @for( $i=19; $i>=0 ; $i--)
+                    @if($message[$i]['username']== Auth::user()->name)
                         <li class="send">
                             <div class="chat-message mt-3">
-                                <div class="text-gray-500 text-xs ml-11">{{$messages['username']}}</div>
+                                <div class="text-gray-500 text-xs ml-11">{{$message[$i]['username']}}</div>
                                 <div class="flex items-end">
                                     <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
                                         <div><span
-                                                class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{{$messages['message']}}</span>
+                                                class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{{$message[$i]['message']}}</span>
                                         </div>
                                     </div>
                                     <img
@@ -64,12 +63,12 @@
                         <li class="send">
                             <div class='chat-message mt-3'>
                                 <div
-                                    class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">{{$messages['username']}}</div>
+                                    class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">{{$message[$i]['username']}}</div>
                                 <div class='flex items-end justify-end'>
                                     <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>
                                         <div
                                             class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
-                                            {{$messages['message']}}
+                                            {{$message[$i]['message']}}
                                         </div>
                                     </div>
                                     <img
@@ -79,10 +78,10 @@
                             </div>
                         </li>
                     @endif
-                @endforeach
+                @endfor
 
             @else
-                <li class="sms"></li>
+                <p>no messages</p>
             @endif
 
 
@@ -156,6 +155,7 @@
 
         }
 
+        $("#chat").scrollTop($("#chat")[0].scrollHeight);
 
     });
 
@@ -197,7 +197,6 @@
             });
         }
 
-
     })
 
     $(document).ready(function () {
@@ -215,52 +214,63 @@
                 $("#chat").scrollTop($("#chat")[0].scrollHeight);
 
                 $('#chat').scroll(function () {
-
-                    setTimeout(function () {
-                        for( let i=r.length-2; i>=0; i--) {
-                            r[i].forEach((data, j) => {
-                                console.log()
-                                if ($('#chat').scrollTop() == 0) {
-                                    if (messagesLength == $('.send').length) {
-                                        console.log('test')
+                    console.log(r.length,$(".send").length,messagesLength);
+                    if ($('#chat').scrollTop() == 0) {
+                        setTimeout(function () {
+                            let currentLength = $(".send").length
+                            if ((r.length - currentLength) < 20) {
+                                var size = r.length - currentLength;
+                            } else {
+                                var size = 20;
+                            }
+                            var currentArray = []
+                            for (let i = currentLength; i < currentLength + size; i++) {
+                                currentArray.push(r[i]);
+                            }
+                            currentArray.forEach((data, j) => {
+                                if (messagesLength == $('.send').length) {
+                                    console.log('123')
+                                } else {
+                                    console.log(data.username)
+                                    if (data.username == current) {
+                                        $("#sms").prepend("<li class='send'>" +
+                                            "<div class='chat-message mt-3'>" +
+                                            "<div class='text-gray-500 text-xs ml-11'>" + data.username + "</div>" +
+                                            "<div class='flex items-end'>" +
+                                            "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start'>" +
+                                            "<div>" + "<span class='px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600'>" + data.message + "</span>" + "</div>" +
+                                            "</div>" +
+                                            "<img src='https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-1'>" +
+                                            "</div>" +
+                                            "</div>" +
+                                            "</li>")
                                     } else {
-                                        if (data.username == current) {
-                                            $("#sms").prepend( "<li class='send'>"+
-                                                "<div class='chat-message mt-3'>" +
-                                                "<div class='text-gray-500 text-xs ml-11'>" + data.user + "</div>" +
-                                                "<div class='flex items-end'>" +
-                                                "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start'>" +
-                                                "<div>" + "<span class='px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600'>" + data.message + "</span>" + "</div>" +
-                                                "</div>" +
-                                                "<img src='https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-1'>" +
-                                                "</div>" +
-                                                "</div>"+
-                                                "</li>")
-                                        } else {
-                                            $(".sms").prepend(  "<li class='send'>"+
-                                                "<div class='chat-message mt-3'>" +
-                                                "<div class='text-gray-500 flex flex items-end justify-end mr-11 text-xs'>" + data.user + "</div>" +
-                                                "<div class='flex items-end justify-end'>" +
-                                                "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>" +
-                                                "<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>" +
-                                                data.message +
-                                                "</div>" +
-                                                "</div>" +
-                                                "<img src='https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-2'>" +
-                                                "</div>" +
-                                                "</div>"+
-                                                "</li>")
-                                        }
-
+                                        $("#sms").prepend("<li class='send'>" +
+                                            "<div class='chat-message mt-3'>" +
+                                            "<div class='text-gray-500 flex flex items-end justify-end mr-11 text-xs'>" + data.username + "</div>" +
+                                            "<div class='flex items-end justify-end'>" +
+                                            "<div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>" +
+                                            "<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>" +
+                                            data.message +
+                                            "</div>" +
+                                            "</div>" +
+                                            "<img src='https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144' alt='My profile' class='w-6 h-6 rounded-full order-2'>" +
+                                            "</div>" +
+                                            "</div>" +
+                                            "</li>")
+                                    }
+                                    if($(".send").length != r.length){
+                                        $("#chat").scrollTop(40);
                                     }
                                 }
                             })
-                        }
-                    },780);
+                        }, 780);
+
+                    }
             })
         })
 
-    })//
+    })
 </script>
 
 </body>
