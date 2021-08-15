@@ -42,6 +42,7 @@
 
         <ul id="sms">
             @if($message)
+                @if(count($message)>20)
                 @for( $i=19; $i>=0 ; $i--)
                     @if($message[$i]['username']== Auth::user()->name)
                         <li class="send">
@@ -77,9 +78,47 @@
                                 </div>
                             </div>
                         </li>
-                    @endif
-                @endfor
-
+                        @endif
+                    @endfor
+                    @else
+                    @for( $j=count($message)-1; $j>=0 ; $j--)
+                        @if($message[$j]['username']== Auth::user()->name)
+                            <li class="send">
+                                <div class="chat-message mt-3">
+                                    <div class="text-gray-500 text-xs ml-11">{{$message[$j]['username']}}</div>
+                                    <div class="flex items-end">
+                                        <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+                                            <div><span
+                                                    class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{{$message[$j]['message']}}</span>
+                                            </div>
+                                        </div>
+                                        <img
+                                            src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
+                                            alt="My profile" class="w-6 h-6 rounded-full order-1">
+                                    </div>
+                                </div>
+                            </li>
+                        @else
+                            <li class="send">
+                                <div class='chat-message mt-3'>
+                                    <div
+                                        class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">{{$message[$j]['username']}}</div>
+                                    <div class='flex items-end justify-end'>
+                                        <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>
+                                            <div
+                                                class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
+                                                {{$message[$j]['message']}}
+                                            </div>
+                                        </div>
+                                        <img
+                                            src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
+                                            alt="My profile" class="w-6 h-6 rounded-full order-2">
+                                    </div>
+                                </div>
+                            </li>
+                        @endif
+                    @endfor
+                @endif
             @else
                 <p>no messages</p>
             @endif
