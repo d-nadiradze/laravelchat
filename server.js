@@ -11,7 +11,17 @@ socket.on('connection',function(io) {
     redis.subscribe('chat_app:channel');
 
     redis.on("message", function(channel, data) {
-        io.emit('chat_message',data);
+        var obj = JSON.parse(data)
+
+        if(obj.event == 'send') {
+            io.emit('chat_message', obj);
+        }
+        if(obj.event == 'remove') {
+            io.emit('remove',obj);
+        }
+
+
+
     });
 });
 

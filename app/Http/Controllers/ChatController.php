@@ -30,11 +30,13 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request)
     {
+
+
         $message = new Message();
         $message->username = $request->input('user');
         $message->message = $request->input('message');
         $message->save();
-        $data = ['message' => $request->input('message'), 'user' => $request->input('user')];
+        $data = ['event'=> 'send','message' => $request->input('message'), 'user' => $request->input('user'),'message_id' => (string)$message->id];
         Redis::publish('channel', json_encode($data));
         return response()->json(['success' => true]);
     }
@@ -42,5 +44,12 @@ class ChatController extends Controller
     public function fetchMessages()
     {
         return $this->message;
+    }
+    public function remove(Request $request)
+    {
+        $data = ['event' => 'remove' , 'id'=>$request->id];
+        Redis::publish('channel', json_encode($data));
+        Message::find($request->id)->delete();
+        return response()->json(['success' => true]);
     }
 }
