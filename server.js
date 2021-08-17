@@ -13,11 +13,11 @@ socket.on('connection',function(io) {
     redis.on("message", function(channel, data) {
         var obj = JSON.parse(data)
 
-        if(obj.event == 'send') {
-            io.emit('chat_message', obj);
-        }
         if(obj.event == 'remove') {
             io.emit('remove',obj);
+        }
+        if(obj.event == 'send') {
+            io.emit('chat_message', obj);
         }
 
 

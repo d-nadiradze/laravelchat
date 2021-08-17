@@ -30,20 +30,33 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request)
     {
-
-
         $message = new Message();
         $message->username = $request->input('user');
+        $message->user_id = $request->input('id');
         $message->message = $request->input('message');
         $message->save();
-        $data = ['event'=> 'send','message' => $request->input('message'), 'user' => $request->input('user'),'message_id' => (string)$message->id];
+
+        $data = [
+            'event'=> 'send',
+            'message' => $request->input('message'),
+            'user' => $request->input('user'),
+            'users_message'=> $message->user_id,
+            'message_id' => $message->id
+        ];
+
         Redis::publish('channel', json_encode($data));
         return response()->json(['success' => true]);
     }
 
     public function fetchMessages()
     {
-        return $this->message;
+        $data =  [
+            'data' => $this->message,
+            'user' => Auth::user()->id
+        ];
+
+        return $data;
+
     }
     public function remove(Request $request)
     {
