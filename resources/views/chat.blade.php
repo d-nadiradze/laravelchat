@@ -35,12 +35,15 @@
                                         <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
                                             <div class="div-del ">
                                                 <div class="group flex flex-row items-center">
-                                                <span
-                                                    class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                                                    {{$message[$i]['message']}}
-                                                    @if($message[$i]['attachments'])
-                                                        <img src="{{asset('img/'.$message[$i]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
-                                                    @endif
+                                                <span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                                                      <span class="block">
+                                                        {{$message[$i]['message']}}
+                                                          @if($message[$i]['attachments'])
+                                                              @for($index = 0; $index < count($message[$i]['attachments']); $index++ )
+                                                                  <img src="{{asset('img/'.Auth::user()->name.$message[$i]['attachments'][$index]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                              @endfor
+                                                          @endif
+                                                    </span>
                                                 </span>
                                                     <div class="ml-2.5 text-red-500">
                                                         <div id="{{$message[$i]['id']}}" class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
@@ -64,8 +67,10 @@
                                             <div
                                                 class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
                                                 {{$message[$i]['message']}}
-                                                @if($message[i]['attachments'])
-                                                    <img src="{{asset('img/'.$message[i]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                @if($message[$i]['attachments'])
+                                                    @for($index = 0; $index < count($message[$i]['attachments']); $index++ )
+                                                        <img src="{{asset('img/'.$message[$i]['username'].$message[$i]['attachments'][$index]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                    @endfor
                                                 @endif
                                             </div>
                                         </div>
@@ -92,7 +97,9 @@
                                                     <span class="block">
                                                         {{$message[$j]['message']}}
                                                         @if($message[$j]['attachments'])
-                                                            <img src="{{asset('img/'.$message[$j]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                            @for($index = 0; $index < count($message[$j]['attachments']); $index++ )
+                                                                <img src="{{asset('img/'.Auth::user()->name.$message[$j]['attachments'][$index]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                            @endfor
                                                         @endif
                                                     </span>
                                                 </span>
@@ -120,7 +127,9 @@
                                             <div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
                                                 {{$message[$j]['message']}}
                                                 @if($message[$j]['attachments'])
-                                                    <img src="{{asset('img/'.$message[$j]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                    @for($index = 0; $index < count($message[$j]['attachments']); $index++ )
+                                                        <img src="{{asset('img/'.$message[$j]['username'].$message[$j]['attachments'][$index]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                    @endfor
                                                 @endif
                                             </div>
                                         </div>

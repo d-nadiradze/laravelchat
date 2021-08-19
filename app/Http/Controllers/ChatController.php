@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
+use Nette\Utils\Image;
 use PRedis;
 use App\Http\Requests;
 use App\Models\Message;
@@ -31,9 +32,8 @@ class ChatController extends Controller
     public function sendMessage(Request $request)
     {
 
+        $x = 100;
         if($request->attachment){
-            $img_name = $request->input('user')."_".$request->attachment[0]->getClientOriginalName();
-            $request->attachment[0]->move(public_path('img'),$img_name);
 
             $message = new Message();
             $message->username = $request->input('user');
@@ -41,16 +41,39 @@ class ChatController extends Controller
             $message->message = $request->input('message');
             $message->save();
 
-            $attachment = new Attachment();
-            $attachment->message_id = $message->id;
-            $attachment->attachment = $img_name;
-            $attachment->save();
+            foreach ($request->attachment as $image){
+                $img_name = $message->id."_".$image->getClientOriginalName();
 
+                $save_path = \public_path('img/'.$request->input('user'));
+                if (!file_exists($save_path)) {
+                    mkdir($save_path, 777, true);
+                }
+
+                $img =\Image::make($image)->resize(null, 400, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+
+                $img->save(\public_path('img/'.$request->input('user').$img_name),$x);
+            }
+
+            $arr = [];
+            $attachments = [];
+            foreach ($request->attachment as $item) {
+                array_push($arr,$item);
+
+                $attachment = new Attachment();
+
+                $attachment->message_id = $message->id;
+                $attachment->attachment = $message->id."_".$item->getClientOriginalName();
+                $attachment->save();
+                array_push($attachments,$message->id."_".$item->getClientOriginalName());
+            }
             $data = [
                 'event' => 'send',
                 'message' => $message->message,
                 'user' => $request->input('user'),
                 'users_message' => $message->user_id,
+                'attachment' =>  $attachments,
                 'message_id' => $message->id
             ];
         }
@@ -67,7 +90,6 @@ class ChatController extends Controller
                 'message' => $request->input('message'),
                 'user' => $request->input('user'),
                 'users_message' => $message->user_id,
-                'attachment' => $request->attachment,
                 'message_id' => $message->id
             ];
         }
@@ -77,13 +99,12 @@ class ChatController extends Controller
     }
 
 
-    public function fetchMessages()
+    public function fetchMessages(Request $request)
     {
         $data = [
             'data' => Message::all()->toArray(),
-            'user' => Auth::user()->id
+            'user' => Auth::user()->id,
         ];
-
         return $data;
     }
 

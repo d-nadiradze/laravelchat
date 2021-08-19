@@ -17,7 +17,7 @@ class CreateMessagesTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('username');
-            $table->text('message');
+            $table->text('message')->nullable();
             $table->timestamps();
         });
     }
