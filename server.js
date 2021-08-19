@@ -19,9 +19,6 @@ socket.on('connection',function(io) {
         if(obj.event == 'send') {
             io.emit('chat_message', obj);
         }
-
-
-
     });
 });
 

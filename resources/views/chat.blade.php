@@ -8,6 +8,7 @@
     <title>Chat</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/scroll.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -16,41 +17,16 @@
 </head>
 <body>
 <style>
-    html {
-        scroll-behavior: smooth;
-    }
 
-    .scrollbar-w-2::-webkit-scrollbar {
-        width: 0.25rem;
-        height: 0.25rem;
-    }
-
-    .scrollbar-track-blue-lighter::-webkit-scrollbar-track {
-        --bg-opacity: 1;
-        background-color: #f7fafc;
-        background-color: rgba(247, 250, 252, var(--bg-opacity));
-    }
-
-    .scrollbar-thumb-blue::-webkit-scrollbar-thumb {
-        --bg-opacity: 1;
-        background-color: #edf2f7;
-        background-color: rgba(237, 242, 247, var(--bg-opacity));
-    }
-
-    .scrollbar-thumb-rounded::-webkit-scrollbar-thumb {
-        border-radius: 0.25rem;
-    }
 </style>
-
 <div class="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
     <div id="chat"
          class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
-
         <ul id="sms">
             @if($message)
                 @if(count($message)>20)
                     @for( $i=19; $i>=0 ; $i--)
-                        @if($message[$j]['user_id']== Auth::user()->id)
+                        @if($message[$i]['user_id']== Auth::user()->id)
                             <li class="send {{$message[$i]['id']}}">
                                 <div class="chat-message mt-3">
                                     <div class="text-gray-500 text-xs ml-11">{{$message[$i]['username']}}</div>
@@ -62,6 +38,9 @@
                                                 <span
                                                     class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
                                                     {{$message[$i]['message']}}
+                                                    @if($message[$i]['attachments'])
+                                                        <img src="{{asset('img/'.$message[$i]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                    @endif
                                                 </span>
                                                     <div class="ml-2.5 text-red-500">
                                                         <div id="{{$message[$i]['id']}}" class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
@@ -85,6 +64,9 @@
                                             <div
                                                 class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
                                                 {{$message[$i]['message']}}
+                                                @if($message[i]['attachments'])
+                                                    <img src="{{asset('img/'.$message[i]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                @endif
                                             </div>
                                         </div>
                                         <img
@@ -106,9 +88,13 @@
                                         <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
                                             <div class="div-del ">
                                                 <div class="group flex flex-row items-center">
-                                                <span
-                                                    class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                                                    {{$message[$j]['message']}}
+                                                <span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                                                    <span class="block">
+                                                        {{$message[$j]['message']}}
+                                                        @if($message[$j]['attachments'])
+                                                            <img src="{{asset('img/'.$message[$j]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                        @endif
+                                                    </span>
                                                 </span>
                                                     <div class="ml-2.5 text-red-500">
                                                         <div id="{{$message[$j]['id']}}"
@@ -131,9 +117,11 @@
                                         class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">{{$message[$j]['username']}}</div>
                                     <div class='flex items-end justify-end'>
                                         <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>
-                                            <div
-                                                class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
+                                            <div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
                                                 {{$message[$j]['message']}}
+                                                @if($message[$j]['attachments'])
+                                                    <img src="{{asset('img/'.$message[$j]['attachments'][0]['attachment'])}}" class="object-contain h-48 w-full rounded-lg p-1 py-1.5" alt="">
+                                                @endif
                                             </div>
                                         </div>
                                         <img
@@ -151,16 +139,44 @@
         </ul>
 
     </div>
-    <form id='form' action="sendmessage" method="POST">
+    <form id='form' action="sendMessage" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="user" value="{{ Auth::user()->name }}">
         <input type="hidden" name="id" value="{{ Auth::user()->id }}">
+{{--        <div class="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">--}}
+{{--            <div class="relative flex">--}}
+{{--                 <span class="absolute inset-y-0 flex items-center">--}}
+{{--                    <button type="button" class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">--}}
+{{--                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-gray-600">--}}
+{{--                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>--}}
+{{--                      </svg>--}}
+{{--                    </button>--}}
+{{--                 </span>--}}
+
+{{--                <input type="text" id='send_keypress' name='message' placeholder="Write Something" class="w-full border border-blue-300 focus:border-blue-400 focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-full py-3">--}}
+
+{{--                <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">--}}
+{{--                    <input type="file" id="attachment" name="attachment[]" multiple>--}}
+{{--                    <button type="button" class="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">--}}
+{{--                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-gray-600">--}}
+{{--                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>--}}
+{{--                        </svg>--}}
+{{--                    </button>--}}
+{{--                    <button type="button" class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">--}}
+{{--                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-6 w-6 transform rotate-90">--}}
+{{--                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>--}}
+{{--                        </svg>--}}
+{{--                    </button>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
         <div class="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
             <div class="relative flex">
 
-                <input type="text" id='s' name='message' placeholder="Write Something"
+                <input type="text" id='send_keypress' name='message' placeholder="Write Something"
                        class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-full py-3">
 
+                <input type="file" id="attachment" name="attachment[]" multiple>
                 <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
                     <button type="button" id="send-message"
                             class="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
@@ -171,7 +187,6 @@
                         </svg>
                     </button>
                 </div>
-
             </div>
         </div>
     </form>

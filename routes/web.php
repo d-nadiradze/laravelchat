@@ -23,6 +23,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/chat', [ChatController::class, 'show'])->middleware(['auth']);
+
 Route::post('/sendMessage', [ChatController::class, 'sendMessage']);
 Route::post('/removeMessage', [ChatController::class, 'remove']);
 
