@@ -19,6 +19,14 @@ socket.on('connection',function(io) {
         if(obj.event == 'send') {
             io.emit('chat_message', obj);
         }
+
+    });
+
+    redis.on("private_message", function (channel, data){
+
+        io.emit('private_message', socket.id, data)
+
+
     });
 });
 

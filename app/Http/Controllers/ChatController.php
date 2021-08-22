@@ -31,10 +31,11 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request)
     {
-
+        $arr = [];
+        $attachments = [];
         $x = 100;
-        if($request->attachment){
 
+        if($request->attachment){
             $message = new Message();
             $message->username = $request->input('user');
             $message->user_id = $request->input('id');
@@ -43,31 +44,27 @@ class ChatController extends Controller
 
             foreach ($request->attachment as $image){
                 $img_name = $message->id."_".$image->getClientOriginalName();
-
                 $save_path = \public_path('img/'.$request->input('user'));
-                if (!file_exists($save_path)) {
+                if (!file_exists($save_path))
+                {
                     mkdir($save_path, 777, true);
                 }
-
                 $img =\Image::make($image)->resize(null, 400, function ($constraint) {
                     $constraint->aspectRatio();
                 });
-
                 $img->save(\public_path('img/'.$request->input('user').$img_name),$x);
             }
 
-            $arr = [];
-            $attachments = [];
             foreach ($request->attachment as $item) {
                 array_push($arr,$item);
 
                 $attachment = new Attachment();
-
                 $attachment->message_id = $message->id;
                 $attachment->attachment = $message->id."_".$item->getClientOriginalName();
                 $attachment->save();
                 array_push($attachments,$message->id."_".$item->getClientOriginalName());
             }
+
             $data = [
                 'event' => 'send',
                 'message' => $message->message,
@@ -105,14 +102,17 @@ class ChatController extends Controller
             'data' => Message::all()->toArray(),
             'user' => Auth::user()->id,
         ];
+
         return $data;
     }
 
     public function remove(Request $request)
     {
         $data = ['event' => 'remove', 'id' => $request->id];
+
         Redis::publish('channel', json_encode($data));
         Message::find($request->id)->delete();
+
         return response()->json(['success' => true]);
     }
 
