@@ -11,37 +11,34 @@ socket.on('remove', function (data) {
 socket.on('chat_message', function (data) {
     if (data['users_message'] == auth_user) {
         $("#sms").append(`
-    <li class="send ${data.message_id}">
-        <div class="chat-message mt-3">
-            <div class="text-gray-500 text-xs ml-11">${data.user}</div>
-            <div class="flex items-end">
-                <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
-                    <div class="div-del">
-                        <div class="group flex flex-row items-center">
-                            <div class="flex flex-col">
-                                <div class="attachment">
+<li class="send ${data.message_id}">
+    <div class="chat-message mt-3">
+        <div class="text-gray-500 text-xs ml-11">${data.user}</div>
+        <div class="flex items-end">
+            <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
+                <div class="div-del ">
+                    <div class="group flex flex-row items-center">
+                        <div class="flex flex-col">
+                            <div class="attachment">
                                  ${(data.attachment ? `
-                                    <div class="grid grid-cols-${data.attachment.length} message_${data.message_id}"
-
-                                    </div>`: ' ')}
-                                 </div>
-                                <div class="message">
-                                ${(data.message ?
-                                    `<span  class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600 ">
-                                        <span class="block">
+                                    <div class="grid grid-cols-${data.attachment.length} message_${data.message_id}">
+                                    </div>`: '')}
+                            </div>
+                            <div class="message">
+                               ${(data.message ?
+                                `<span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                                    <span class="block">
                                             ${data.message}
-                                        </span>
-                                    </span>`
-                                    : ' ')}
-                                </div>
+                                    </span>
+                                </span>`
+                                : '')}
                             </div>
                         </div>
                         <div class="ml-2.5 text-red-500">
-                                <div id="${data.message_id}"
-                                     class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
-                                    <i class="fa fa-trash-o fa-lg"></i>
-                                </div>
-                            </div>
+                            <div id="${data.message_id}"
+                                 class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
+                                <i class="fa fa-trash-o fa-lg"></i></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -49,7 +46,8 @@ socket.on('chat_message', function (data) {
                 src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
                 alt="My profile" class="w-6 h-6 rounded-full order-1">
         </div>
-    </li>
+    </div>
+</li>
                 `);
 
         if (data.attachment != null) {
@@ -111,9 +109,6 @@ socket.on('chat_message', function (data) {
     $("#chat").scrollTop($("#chat")[0].scrollHeight);
 });
 
-socket.on('private_chat', function (data) {
-
-});
 $(document).ready(function () {
     $("#send_keypress").keypress(function (e) {
         if (e.which == 13) {
