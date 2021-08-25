@@ -1,11 +1,41 @@
 $("#chat").scrollTop($("#chat")[0].scrollHeight);
-
-var socket = io.connect('http://localhost:3000', {transports: ['websocket']});
-
 var auth_user = $("input[name='id']").val();
+var socket = io.connect('http://localhost:3000', {query : {userId : auth_user},transports: ['websocket']});
 
-socket.on('remove', function (data) {
-    $("." + data.id).remove();
+
+socket.on('ConnectedUserArray', function (array){
+    console.log(array)
+    $.ajax({
+      method: "GET",
+      url : "/activeUsers",
+      data : {
+          ids: array
+      }
+    });
+})
+
+socket.on('activeUsers', (array) => {
+    console.log(array.data)
+    for(let i=0; i<=array.data.length-1; i++){
+        if (array.data[i].id != auth_user){
+            $(".users").append(`
+         <li>
+                    <a class="hover:bg-gray-100 border-b border-gray-300 px-3 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-150 ease-in-out">
+                        <img class="h-10 w-10 rounded-full object-cover"
+                             src="https://images.pexels.com/photos/837358/pexels-photo-837358.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260"
+                             alt="username" />
+                        <div class="w-full pb-2">
+                            <div class="flex justify-between">
+                                <span class="block ml-2 font-semibold text-base text-gray-600 ">${array.data[i].name}</span>
+                                <span class="block ml-2 text-sm text-gray-600">5 min ago</span>
+                            </div>
+                            <span class="block ml-2 text-sm text-gray-600">${array.data[i].message}</span>
+                        </div>
+                    </a>
+                </li>
+`)
+        }
+    }
 })
 
 socket.on('chat_message', function (data) {
@@ -86,7 +116,6 @@ socket.on('chat_message', function (data) {
                 </div>
             </li>
         `);
-
         if (data.attachment != null ) {
             if ( data.attachment.length <= 4){
                 $count = data.attachment.length
@@ -104,10 +133,13 @@ socket.on('chat_message', function (data) {
                 `)
             }
         }
-
     }
     $("#chat").scrollTop($("#chat")[0].scrollHeight);
-});
+})
+
+socket.on('remove', function (data) {
+    $("." + data.id).remove();
+})
 
 $(document).ready(function () {
     $("#send_keypress").keypress(function (e) {
@@ -132,7 +164,6 @@ $(document).ready(function () {
     })
 
     $("#send-message").click(function (e) {
-
         let formData = new FormData($('#form')[0]);
         $.ajax({
             url: '/sendMessage',
@@ -142,12 +173,12 @@ $(document).ready(function () {
             processData: false,
             success: function (data) {
                 $("input[name='message']").val('');
+                $("#attachment").val('');
             }
         });
     })
 
     $("body").on('click', '.delete', function () {
-
         var _token = $("input[name='_token']").val();
         var id = this.id;
         $.ajax({
@@ -160,11 +191,9 @@ $(document).ready(function () {
             }
         })
     })
+
     $("#chat").scrollTop($("#chat")[0].scrollHeight);
 
-})
-
-$(document).ready(function () {
     $('#chat').scroll(function () {
         if ($('#chat').scrollTop() == 0) {
             $.ajax({
@@ -222,7 +251,6 @@ $(document).ready(function () {
                                     </div>
                                 </li>
                                             `);
-
                         }
                     }
                 }, 780);
@@ -230,3 +258,5 @@ $(document).ready(function () {
         }
     })
 })
+
+

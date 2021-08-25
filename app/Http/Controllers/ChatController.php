@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AttributeRequest;
 use App\Models\Attachment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ use PRedis;
 use App\Http\Requests;
 use App\Models\Message;
 use App\Http\Controllers\Controller;
+use Psy\Util\Json;
 
 
 class ChatController extends Controller
@@ -26,7 +28,7 @@ class ChatController extends Controller
 
     public function show()
     {
-        return view('chat', ['message' => $this->message, 'current' => [Auth::user()], 'attachments' => Attachment::all()->toArray()]);
+        return view('chat', ['message' => $this->message, 'current' => [Auth::user()], 'attachments' => Attachment::all()->toArray(), 'users' => User::all()], );
     }
 
     public function sendMessage(Request $request)
@@ -34,7 +36,6 @@ class ChatController extends Controller
         $arr = [];
         $attachments = [];
         $x = 100;
-
         if($request->attachment){
             $message = new Message();
             $message->username = $request->input('user');
@@ -54,17 +55,14 @@ class ChatController extends Controller
                 });
                 $img->save(\public_path('img/'.$request->input('user').$img_name),$x);
             }
-
             foreach ($request->attachment as $item) {
                 array_push($arr,$item);
-
                 $attachment = new Attachment();
                 $attachment->message_id = $message->id;
                 $attachment->attachment = $message->id."_".$item->getClientOriginalName();
                 $attachment->save();
                 array_push($attachments,$message->id."_".$item->getClientOriginalName());
             }
-
             $data = [
                 'event' => 'send',
                 'message' => $message->message,
@@ -74,14 +72,12 @@ class ChatController extends Controller
                 'message_id' => $message->id
             ];
         }
-
         else if ($request->message) {
             $message = new Message();
             $message->username = $request->input('user');
             $message->user_id = $request->input('id');
             $message->message = $request->input('message');
             $message->save();
-
             $data = [
                 'event' => 'send',
                 'message' => $request->input('message'),
@@ -90,11 +86,9 @@ class ChatController extends Controller
                 'message_id' => $message->id
             ];
         }
-
         Redis::publish('channel', json_encode($data));
         return response()->json(['success' => true]);
     }
-
 
     public function fetchMessages(Request $request)
     {
@@ -109,11 +103,24 @@ class ChatController extends Controller
     public function remove(Request $request)
     {
         $data = ['event' => 'remove', 'id' => $request->id];
-
         Redis::publish('channel', json_encode($data));
         Message::find($request->id)->delete();
-
         return response()->json(['success' => true]);
+
     }
+
+    public function activeUsers(Request $request){
+
+        $users = User::find('id',$request->ids)->get();
+        dump($users);
+        $data = ['event' => 'activeUsers', 'data' => $users];
+        Redis::publish('channel',json_encode($data));
+        dump($data);
+    }
+
+
+
+
+
 
 }

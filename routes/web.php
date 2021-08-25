@@ -23,9 +23,13 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/chat', [ChatController::class, 'show'])->middleware(['auth']);
-
-Route::post('/sendMessage', [ChatController::class, 'sendMessage']);
-Route::post('/removeMessage', [ChatController::class, 'remove']);
-
+Route::post('/sendMessage', [ChatController::class, 'sendMessage'])->middleware(['auth']);
+Route::post('/removeMessage', [ChatController::class, 'remove'])->middleware(['auth']);
 Route::get('/messages',[ChatController::class,'fetchMessages'])->middleware('auth');
+Route::get('/activeUsers',[ChatController::class,'activeUsers']);
+Route::get('/logout', function () {
+    auth()->logout();
+    return redirect('/login');
+});
+
 require __DIR__.'/auth.php';
