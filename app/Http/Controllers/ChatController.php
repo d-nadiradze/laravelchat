@@ -110,12 +110,9 @@ class ChatController extends Controller
     }
 
     public function activeUsers(Request $request){
-
-        $users = User::find('id',$request->ids)->get();
-        dump($users);
+        $users = User::find($request->ids);
         $data = ['event' => 'activeUsers', 'data' => $users];
         Redis::publish('channel',json_encode($data));
-        dump($data);
     }
 
 

@@ -15,29 +15,28 @@ socket.on('ConnectedUserArray', function (array){
 })
 
 socket.on('activeUsers', (array) => {
-    console.log(array.data)
-    for(let i=0; i<=array.data.length-1; i++){
-        if (array.data[i].id != auth_user){
+    $(".users").empty();
+    array.data.forEach((e) => {
+        if ($(`li[userId=${e.id}]`).length === 0 && auth_user != e.id) {
             $(".users").append(`
-         <li>
+         <li userId="${e.id}">
                     <a class="hover:bg-gray-100 border-b border-gray-300 px-3 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-150 ease-in-out">
                         <img class="h-10 w-10 rounded-full object-cover"
                              src="https://images.pexels.com/photos/837358/pexels-photo-837358.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260"
                              alt="username" />
                         <div class="w-full pb-2">
                             <div class="flex justify-between">
-                                <span class="block ml-2 font-semibold text-base text-gray-600 ">${array.data[i].name}</span>
+                                <span class="block ml-2 font-semibold text-base text-gray-600 ">${e.name}</span>
                                 <span class="block ml-2 text-sm text-gray-600">5 min ago</span>
                             </div>
-                            <span class="block ml-2 text-sm text-gray-600">${array.data[i].message}</span>
+                            <span class="block ml-2 text-sm text-gray-600">${e.message}</span>
                         </div>
                     </a>
                 </li>
 `)
         }
-    }
+    })
 })
-
 socket.on('chat_message', function (data) {
     if (data['users_message'] == auth_user) {
         $("#sms").append(`

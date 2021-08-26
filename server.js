@@ -11,6 +11,7 @@ io.sockets.on('connect', function (socket) {
     if(!array.includes(user)){
         array.push(user)
     }
+    console.log(user)
     console.log(array)
     io.sockets.emit("ConnectedUserArray", array);
     redis.subscribe('chat_app:channel');
@@ -29,11 +30,13 @@ io.sockets.on('connect', function (socket) {
         }
     });
 
-    socket.on('disconnect', () => {
-        let userid = array.indexOf(user);
-        array.splice(userid,1)
-        io.sockets.emit('ConnectedUserArray',array);
-        console.log(array)
+    socket.on('disconnect', () =>{
+            let newArr = array.filter((e) => {
+                return e!== socket.handshake.query.userId
+            });
+            array = newArr;
+            console.log(array)
+            io.sockets.emit('ConnectedUserArray',array);
     });
 
 });
