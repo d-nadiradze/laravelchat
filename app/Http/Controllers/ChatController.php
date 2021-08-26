@@ -41,6 +41,7 @@ class ChatController extends Controller
             $message->username = $request->input('user');
             $message->user_id = $request->input('id');
             $message->message = $request->input('message');
+            $message->
             $message->save();
 
             foreach ($request->attachment as $image){
@@ -115,9 +116,21 @@ class ChatController extends Controller
         Redis::publish('channel',json_encode($data));
     }
 
+    public function privateChat(Request $request)
+    {
+        $id = $request->id;
 
+        $data = Message::where(function($query) use($id) {
+            $query->where('user_id',$id)
+                ->where('get_by',Auth::user()->id);
 
+        })->orWhere(function($query) use($id) {
+            $query->where('user_id', Auth::user()->id)
+                ->where('get_by', $id );
 
+        })->orderBy('id','desc')->take(20)->get();
 
+        return $data;
+    }
 
 }

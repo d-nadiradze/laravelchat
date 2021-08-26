@@ -26,7 +26,9 @@ Route::get('/chat', [ChatController::class, 'show'])->middleware(['auth']);
 Route::post('/sendMessage', [ChatController::class, 'sendMessage'])->middleware(['auth']);
 Route::post('/removeMessage', [ChatController::class, 'remove'])->middleware(['auth']);
 Route::get('/messages',[ChatController::class,'fetchMessages'])->middleware('auth');
-Route::get('/activeUsers',[ChatController::class,'activeUsers']);
+Route::get('/activeUsers',[ChatController::class,'activeUsers'])->middleware('auth');
+Route::get('/privateChat',[ChatController::class,'privateChat'])->middleware('auth');
+
 Route::get('/logout', function () {
     auth()->logout();
     return redirect('/login');
