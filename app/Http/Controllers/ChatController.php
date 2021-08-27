@@ -33,6 +33,7 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request)
     {
+
         $arr = [];
         $attachments = [];
         $x = 100;
@@ -41,7 +42,7 @@ class ChatController extends Controller
             $message->username = $request->input('user');
             $message->user_id = $request->input('id');
             $message->message = $request->input('message');
-            $message->
+            $message->get_by = $request->input('receiver_id');
             $message->save();
 
             foreach ($request->attachment as $image){
@@ -68,21 +69,24 @@ class ChatController extends Controller
                 'event' => 'send',
                 'message' => $message->message,
                 'user' => $request->input('user'),
+                'receiver_id' => $request->input('receiver_id'),
                 'users_message' => $message->user_id,
                 'attachment' =>  $attachments,
                 'message_id' => $message->id
             ];
         }
-        else if ($request->message) {
+        else if ($request->message && $request->receiver_id != null) {
             $message = new Message();
             $message->username = $request->input('user');
             $message->user_id = $request->input('id');
+            $message->get_By = $request->input('receiver_id');
             $message->message = $request->input('message');
             $message->save();
             $data = [
                 'event' => 'send',
                 'message' => $request->input('message'),
                 'user' => $request->input('user'),
+                'receiver_id' => $request->input('receiver_id'),
                 'users_message' => $message->user_id,
                 'message_id' => $message->id
             ];
@@ -128,7 +132,7 @@ class ChatController extends Controller
             $query->where('user_id', Auth::user()->id)
                 ->where('get_by', $id );
 
-        })->orderBy('id','desc')->take(20)->get();
+        })->with('attachments')->get();
 
         return $data;
     }

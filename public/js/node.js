@@ -1,19 +1,17 @@
 $("#chat").scrollTop($("#chat")[0].scrollHeight);
 var auth_user = $("input[name='id']").val();
-var socket = io.connect('http://localhost:3000', {query : {userId : auth_user},transports: ['websocket']});
+var socket = io.connect('http://localhost:3000', {query: {userId: auth_user}, transports: ['websocket']});
 
-
-socket.on('ConnectedUserArray', function (array){
+socket.on('ConnectedUserArray', function (array) {
     console.log(array)
     $.ajax({
-      method: "GET",
-      url : "/activeUsers",
-      data : {
-          ids: array
-      }
+        method: "GET",
+        url: "/activeUsers",
+        data: {
+            ids: array
+        }
     });
 })
-
 socket.on('activeUsers', (array) => {
     $(".users").empty();
     array.data.forEach((e) => {
@@ -51,16 +49,16 @@ socket.on('chat_message', function (data) {
                             <div class="attachment">
                                  ${(data.attachment ? `
                                     <div class="grid grid-cols-${data.attachment.length} message_${data.message_id}">
-                                    </div>`: '')}
+                                    </div>` : '')}
                             </div>
                             <div class="message">
                                ${(data.message ?
-                                `<span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+            `<span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
                                     <span class="block">
                                             ${data.message}
                                     </span>
                                 </span>`
-                                : '')}
+            : '')}
                             </div>
                         </div>
                         <div class="ml-2.5 text-red-500">
@@ -78,7 +76,6 @@ socket.on('chat_message', function (data) {
     </div>
 </li>
                 `);
-
         if (data.attachment != null) {
             for ($i = 0; $i < data.attachment.length; $i++) {
                 $(".message_" + data.message_id).append(`
@@ -88,7 +85,6 @@ socket.on('chat_message', function (data) {
                 `)
             }
         }
-
     } else {
         $("#sms").append(`
             <li class="send ${data.message_id}">
@@ -99,14 +95,12 @@ socket.on('chat_message', function (data) {
                         <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end '>
                             <div class="attachment_${data.message_id}">
                             </div>
-
                             ${(data.message ?
-                                `<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100' >
+                `<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100' >
                                     ${data.message}
                                 </div>` :
-                            `<div></div>`
-                            )}
-
+                `<div></div>`
+        )}
                         </div>
                         <img
                             src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
@@ -115,11 +109,10 @@ socket.on('chat_message', function (data) {
                 </div>
             </li>
         `);
-        if (data.attachment != null ) {
-            if ( data.attachment.length <= 4){
+        if (data.attachment != null) {
+            if (data.attachment.length <= 4) {
                 $count = data.attachment.length
-            }
-            else{
+            } else {
                 $count = 4;
             }
             $(".attachment_" + data.message_id).addClass(`grid grid-cols-${$count}`)
@@ -135,25 +128,25 @@ socket.on('chat_message', function (data) {
     }
     $("#chat").scrollTop($("#chat")[0].scrollHeight);
 })
-
 socket.on('remove', function (data) {
     $("." + data.id).remove();
 })
-
 $(document).ready(function () {
+    $("#chat").scrollTop($("#chat")[0].scrollHeight);
     $("#send_keypress").keypress(function (e) {
         if (e.which == 13) {
             e.preventDefault();
-            var _token = $("input[name='_token']").val();
-            var user = $("input[name='user']").val();
-            var id = $("input[name='id']").val();
-            var message = $("input[name='message']").val();
+            let _token = $("input[name='_token']").val();
+            let user = $("input[name='user']").val();
+            let id = $("input[name='id']").val();
+            let message = $("input[name='message']").val();
+            let receiver_id = $("input[name='receiver_id']").val();
             if (message != '') {
                 $.ajax({
                     type: "POST",
                     url: '/sendMessage',
                     dataType: "json",
-                    data: {'_token': _token, 'message': message, 'user': user, 'id': id},
+                    data: {'_token': _token, 'message': message, 'user': user, 'id': id, 'receiver_id': receiver_id },
                     success: function (data) {
                         $("input[name='message']").val('');
                     }
@@ -161,7 +154,6 @@ $(document).ready(function () {
             }
         }
     })
-
     $("#send-message").click(function (e) {
         let formData = new FormData($('#form')[0]);
         $.ajax({
@@ -176,7 +168,6 @@ $(document).ready(function () {
             }
         });
     })
-
     $("body").on('click', '.delete', function () {
         var _token = $("input[name='_token']").val();
         var id = this.id;
@@ -190,21 +181,111 @@ $(document).ready(function () {
             }
         })
     })
-
     $("body").on('click', '.active_user', function () {
-        console.log(this.id)
+        $('#receiver_id').val(this.id);
+        socket.emit('privateChat',this.id)
         $.ajax({
             type: "GET",
             url: '/privateChat',
-            data: {'id' : this.id},
-            success: function (data){
+            data: {'id': this.id},
+            success: function (message) {
+                message.forEach((data) => {
+                    if (data.user_id == auth_user ) {
+                        $("#sms").append(`
+<li class="send ${data.id}">
+    <div class="chat-message mt-3">
+        <div class="text-gray-500 text-xs ml-11">${data.username}</div>
+        <div class="flex items-end">
+            <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
+                <div class="div-del ">
+                    <div class="group flex flex-row items-center">
+                        <div class="flex flex-col">
+                            <div class="attachment">
+                                 ${(data.attachments ? `
+                                    <div class="grid grid-cols-${data.attachments.length} message_${data.id}">
+                                    </div>` : '')}
+                            </div>
+                            <div class="message">
+                               ${(data.message ?
+                            `<span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                                    <span class="block">
+                                            ${data.message}
+                                    </span>
+                                </span>`
+                            : '')}
+                            </div>
+                        </div>
+                        <div class="ml-2.5 text-red-500">
+                            <div id="${data.id}"
+                                 class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
+                                <i class="fa fa-trash-o fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <img
+                src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
+                alt="My profile" class="w-6 h-6 rounded-full order-1">
+        </div>
+    </div>
+</li>
+                `);
+                        if (data.attachments != null) {
+                            for ($i = 0; $i < data.attachments.length; $i++) {
+                                $(".message_" + data.id).append(`
+                <div class="" style="height: 250px;">
+                    <img src="img/${data.username}${data.attachments[$i].attachment}" class="w-full h-full object-cover rounded-lg py-1 p-1" alt="">
+                </div>
+                `)
+                            }
+                        }
+                    }
+                    else {
+                        $("#sms").append(`
+            <li class="send ${data.id}">
+                <div class='chat-message mt-3'>
+                    <div
+                        class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${data.username}</div>
+                    <div class='flex items-end justify-end'>
+                        <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end '>
+                            <div class="attachment_${data.id}">
+                            </div>
+                            ${(data.message ?
+                            `<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100' >
+                                    ${data.message}
+                                </div>` :
+                            `<div></div>`
+                    )}
+                        </div>
+                        <img
+                            src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
+                            alt="My profile" class="w-6 h-6 rounded-full order-2">
+                    </div>
+                </div>
+            </li>
+        `);
+                        if (data.attachments != null) {
+                            if (data.attachments.length <= 4) {
+                                $count = data.attachments.length
+                            } else {
+                                $count = 4;
+                            }
+                            $(".attachment_" + data.id).addClass(`grid grid-cols-${$count}`)
 
+                            for ($i = 0; $i < data.attachments.length; $i++) {
+                                $(".attachment_" + data.id).append(`
+                <div class="" style="height: 250px;">
+                    <img src="img/${data.username}${data.attachments[$i].attachment}" class="w-full h-full object-cover rounded-lg py-1 p-1" alt="">
+                </div>
+                `)
+                            }
+                        }
+                    }
+                    $("#chat").scrollTop($("#chat")[0].scrollHeight);
+                })
             }
         })
     })
-
-    $("#chat").scrollTop($("#chat")[0].scrollHeight);
-
     $('#chat').scroll(function () {
         if ($('#chat').scrollTop() == 0) {
             $.ajax({
