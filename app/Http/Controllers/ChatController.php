@@ -23,12 +23,13 @@ class ChatController extends Controller
     public function __construct(Message $message)
     {
         $this->middleware('auth');
-        $this->message = array_reverse($message::with('attachments')->get()->toArray());
+        $this->message = $message::with('attachments')->get()->toArray();
     }
 
-    public function show()
+    public function show(Request $request)
     {
-        return view('chat', ['message' => $this->message, 'current' => [Auth::user()], 'attachments' => Attachment::all()->toArray(), 'users' => User::all()], );
+        $receiver = $request->input('receiver_id');
+        return view('chat', ['receiver' => $receiver]);
     }
 
     public function sendMessage(Request $request)
@@ -108,8 +109,8 @@ class ChatController extends Controller
     public function remove(Request $request)
     {
         $data = ['event' => 'remove', 'id' => $request->id];
-        Redis::publish('channel', json_encode($data));
         Message::find($request->id)->delete();
+        Redis::publish('channel',json_encode($data));
         return response()->json(['success' => true]);
 
     }
@@ -118,23 +119,25 @@ class ChatController extends Controller
         $users = User::find($request->ids);
         $data = ['event' => 'activeUsers', 'data' => $users];
         Redis::publish('channel',json_encode($data));
+        return view('chat',['receiver' => $request->id]);
     }
 
     public function privateChat(Request $request)
     {
         $id = $request->id;
 
+        $username = User::find($id);
         $data = Message::where(function($query) use($id) {
             $query->where('user_id',$id)
                 ->where('get_by',Auth::user()->id);
 
         })->orWhere(function($query) use($id) {
             $query->where('user_id', Auth::user()->id)
-                ->where('get_by', $id );
+                ->where('get_by', $id);
 
-        })->with('attachments')->get();
+        })->with('attachments')->orderBy('id','desc')->get()->take(20)->reverse()->values();
 
-        return $data;
+        return [$data,$username];
     }
 
 }

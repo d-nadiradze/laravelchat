@@ -12,7 +12,6 @@ io.sockets.on('connect', function (socket) {
 
     redis.on("message", function (channel, data) {
         var obj = JSON.parse(data)
-
         if (obj.event == 'activeUsers') {
             socket.emit('activeUsers', obj);
         }
@@ -21,7 +20,7 @@ io.sockets.on('connect', function (socket) {
     socket.on('privateChat',(id) => {
         redis.on("message", function (channel, data) {
             var obj = JSON.parse(data)
-            console.log(obj.receiver_id,id,user)
+
             if (obj.event == 'remove') {
                 socket.emit('remove', obj.id);
             }
