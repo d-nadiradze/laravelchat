@@ -9,6 +9,7 @@ io.sockets.on('connect', function (socket) {
     user = socket.handshake.query.userId ;
 
     redis.subscribe('chat_app:channel');
+
     redis.on("message", function (channel, data) {
         var obj = JSON.parse(data)
 
