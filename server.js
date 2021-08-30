@@ -34,7 +34,6 @@ io.sockets.on('connect', function (socket) {
                 return e!== socket.handshake.query.userId
             });
             array = newArr;
-            console.log(array)
             io.sockets.emit('ConnectedUserArray',array);
     });
     connectedUsers();
@@ -47,7 +46,6 @@ function connectedUsers(){
     if(!array.includes(user)){
         array.push(user)
     }
-    console.log(array)
     io.sockets.emit("ConnectedUserArray", array);
 }
 

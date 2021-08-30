@@ -3,7 +3,6 @@ var auth_user = $("input[name='id']").val();
 var socket = io.connect('http://localhost:3000', {query: {userId: auth_user}, transports: ['websocket']});
 
 socket.on('ConnectedUserArray', function (array) {
-    console.log(array)
     $.ajax({
         method: "GET",
         url: "/activeUsers",
@@ -131,7 +130,6 @@ socket.on('chat_message', function (data) {
     }
 })
 socket.on('remove', function (data) {
-    console.log(data)
     $("." + data).remove();
 })
 $(document).ready(function () {
@@ -197,15 +195,14 @@ $(document).ready(function () {
                 $('#sms').empty()
 
                 $('.inputsForForm').append(`
-                <label
-                                class="mr-4 inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                     stroke="currentColor" class="h-6 w-6 text-gray-600">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                                </svg>
-                                <input type='file' id="attachment" name="attachment[]" multiple class="hidden"/>
-                            </label>
+                <label class="mr-4 inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" class="h-6 w-6 text-gray-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                    </svg>
+                    <input type='file' id="attachment" name="attachment[]" multiple class="hidden"/>
+                </label>
                 <input type="text" id='send_keypress' name='message' placeholder="Write Something"
                        class="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-400 pl-12 bg-gray-100 hover:bg-blue-50 rounded-full py-3">
                 <div class="absolute right-0 items-center inset-y-0 hidden sm:flex">
@@ -236,7 +233,6 @@ $(document).ready(function () {
                     </div>
                 </div>`)
                 message[0].forEach((data) => {
-                    console.log(data)
                     if (data.user_id == auth_user) {
                         $("#sms").append(`
                             <li class="send ${data.id}">
@@ -340,29 +336,30 @@ $(document).ready(function () {
             $.ajax({
                 method: "GET",
                 url: "/messages",
+                data: {'id' : $('#receiver_id').val()},
                 headers: {
                     'Access-Control-Allow-Origin': '*'
                 }
             }).done((r) => {
                 setTimeout(function () {
-                    var size = r['data'].length - $(".send").length;
+                    var size = r.length - $(".send").length;
                     for (i = size - 1; i >= size - 20; i--) {
-                        if (r['data'].length == $(".send").length) {
+                        if (r.length == $(".send").length) {
 
-                        } else if (r['data'][i].user_id == auth_user) {
+                        } else if (r[i].user_id == auth_user) {
                             $("#sms").prepend(`
-                             <li class="send ${r['data'][i].id}">
+                             <li class="send ${r[i].id}">
                                 <div class="chat-message mt-3">
-                                    <div class="text-gray-500 text-xs ml-11">${r['data'][i].username}</div>
+                                    <div class="text-gray-500 text-xs ml-11">${r[i].username}</div>
                                     <div class="flex items-end">
                                     <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
                                     <div class="div-del">
                                     <div class="group flex flex-row items-center">
                                         <span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                                            ${r['data'][i].message}
+                                            ${r[i].message}
                                         </span>
                                    <div  class="ml-2.5 text-red-500">
-                                   <div id="${r['data'][i].id}" class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75"><i class="fa fa-trash-o fa-lg"></i></div>
+                                   <div id="${r[i].id}" class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75"><i class="fa fa-trash-o fa-lg"></i></div>
                                    </div>
                                    </div>
                                    </div>
@@ -374,15 +371,15 @@ $(document).ready(function () {
                                 </li>`)
                         } else {
                             $("#sms").prepend(`
-                                <li class="send ${r['data'][i].id}">
+                                <li class="send ${r[i].id}">
                                     <div class='chat-message mt-3'>
                                         <div
-                                            class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${r['data'][i].username}</div>
+                                            class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${r[i].username}</div>
                                         <div class='flex items-end justify-end'>
                                             <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end'>
                                                 <div
                                                     class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100'>
-                                                    ${r['data'][i].message}
+                                                    ${r[i].message}
                                                 </div>
                                             </div>
                                             <img

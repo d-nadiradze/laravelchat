@@ -98,10 +98,17 @@ class ChatController extends Controller
 
     public function fetchMessages(Request $request)
     {
-        $data = [
-            'data' => Message::all()->toArray(),
-            'user' => Auth::user()->id,
-        ];
+        $id = $request->id;
+
+        $data = Message::where(function($query) use($id) {
+            $query->where('user_id',$id)
+                ->where('get_by',Auth::user()->id);
+
+        })->orWhere(function($query) use($id) {
+            $query->where('user_id', Auth::user()->id)
+                ->where('get_by', $id);
+
+        })->get()->toArray();
 
         return $data;
     }
