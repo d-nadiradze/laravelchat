@@ -48,7 +48,12 @@
                 <x-button class="mx-auto">
                     {{ __('Log in') }}
                 </x-button>
+
+
             </div>
         </form>
+        <div class="text-center mt-5">
+            <i>Didn't <a href="/register" class="text-blue-400">Register</a> yet?</i>
+        </div>
     </x-auth-card>
 </x-guest-layout>

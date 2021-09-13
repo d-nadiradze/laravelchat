@@ -24,9 +24,9 @@ socket.on('activeUsers', (array) => {
                         <div class="w-full pb-2">
                             <div class="flex justify-between">
                                 <span class="block ml-2 font-semibold text-base text-gray-600 ">${e.name}</span>
-                                <span class="block ml-2 text-sm text-gray-600">5 min ago</span>
+                                <span class="block ml-2 text-sm text-gray-600"></span>
                             </div>
-                            <span class="block ml-2 text-sm text-gray-600">${e.message}</span>
+                            <span class="block ml-2 text-sm text-gray-600"></span>
                         </div>
                     </a>
                 </li>
@@ -35,7 +35,7 @@ socket.on('activeUsers', (array) => {
     })
 })
 socket.on('chat_message', function (data) {
-    if (data.receiver_id == auth_user || data.users_message == auth_user) {
+    if (($('#user').val() == data.receiver_id && data.users_message == $('#receiver_id').val()) || data.users_message == auth_user) {
         if (data['users_message'] == auth_user) {
             $("#sms").append(`
 <li class="send ${data.message_id}">
@@ -53,18 +53,19 @@ socket.on('chat_message', function (data) {
                             </div>
                             <div class="message">
                                ${(data.message ?
-                `<span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                            `<span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
                                     <span class="block">
                                             ${data.message}
                                     </span>
-                                </span>`
+                            </span>`
                 : '')}
                             </div>
                         </div>
                         <div class="ml-2.5 text-red-500">
                             <div id="${data.message_id}"
                                  class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
-                                <i class="fa fa-trash-o fa-lg"></i></div>
+                                <i class="fa fa-trash-o fa-lg"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -89,16 +90,15 @@ socket.on('chat_message', function (data) {
             $("#sms").append(`
             <li class="send ${data.message_id}">
                 <div class='chat-message mt-3'>
-                    <div
-                        class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${data.user}</div>
-                    <div class='flex items-end justify-end'>
-                        <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end '>
-                            <div class="attachment_${data.message_id}">
+                    <div class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${data.user}</div>
+                        <div class='flex items-end justify-end'>
+                            <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end '>
+                                <div class="attachment_${data.message_id}">
                             </div>
                             ${(data.message ?
-                    `<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100' >
+                            `<div class='px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-gray-100' >
                                     ${data.message}
-                                </div>` :
+                            </div>` :
                     `<div></div>`
             )}
                         </div>
@@ -134,6 +134,21 @@ socket.on('remove', function (data) {
 })
 $(document).ready(function () {
     $("#chat").scrollTop($("#chat")[0].scrollHeight);
+    /* responsive design */
+    $("body").on('click', ".active_user", function (e){
+        $('.chat-side').removeClass('hidden');
+        $('.user-side').addClass('hidden');
+    })
+    $("body").on('click', "#active_user_button", function (e){
+        $('.user-side').removeClass('hidden');
+        $('.user-side').addClass('w-2/5');
+        $('.user-side').removeClass('w-screen');
+    })
+    $("body").on('click', '#sms', function (){
+        $('.user-side').addClass('hidden');
+    })
+
+    /* send message */
     $("body").on('keypress', "#send_keypress", function (e) {
         if (e.which == 13) {
             e.preventDefault();
@@ -169,6 +184,8 @@ $(document).ready(function () {
             }
         });
     })
+
+    /* delete message */
     $("body").on('click', '.delete', function () {
         var _token = $("input[name='_token']").val();
         var id = this.id;
@@ -182,6 +199,8 @@ $(document).ready(function () {
             }
         })
     })
+
+    /* private chat */
     $("body").on('click', '.active_user', function () {
         $('#receiver_id').val(this.id);
         socket.emit('privateChat', this.id)
@@ -217,8 +236,11 @@ $(document).ready(function () {
                     </button>
                 </div>`)
                 $('.chat-header').prepend(`
-                <div class="flex sm:items-center justify-between p-2 pb-4 border-b-2 border-gray-200">
-                    <div class="flex items-center space-x-4">
+                <div class="flex sm:items-center justify-between p-2 pb-4 border-b-2 border-gray-200" id="active_user_button">
+                  <div class="px-2 py-1 bg-blue-600 rounded text-gray-50 cursor-pointer md:hidden block">
+                        <i class="fa fa-group"></i>
+                  </div>
+                    <div class="flex justify-center items-center w-full space-x-4">
                         <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="" class="w-8 sm:w-10 h-8 sm:h-10 rounded-full">
                         <div class="flex flex-col leading-tight">
                             <div class="text-2xl mt-1 flex items-center">
@@ -235,7 +257,7 @@ $(document).ready(function () {
                 message[0].forEach((data) => {
                     if (data.user_id == auth_user) {
                         $("#sms").append(`
-                            <li class="send ${data.id}">
+<li class="send ${data.id}">
     <div class="chat-message mt-3">
         <div class="text-gray-500 text-xs ml-11">${data.username}</div>
         <div class="flex items-end">
@@ -254,7 +276,7 @@ $(document).ready(function () {
                                     <span class="block">
                                             ${data.message}
                                     </span>
-                                </span>`
+                            </span>`
                             : '')}
                             </div>
                         </div>
@@ -262,7 +284,7 @@ $(document).ready(function () {
                             <div id="${data.id}"
                                  class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75">
                                 <i class="fa fa-trash-o fa-lg"></i></div>
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -286,8 +308,7 @@ $(document).ready(function () {
                         $("#sms").append(`
             <li class="send ${data.id}">
                 <div class='chat-message mt-3'>
-                    <div
-                        class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${data.username}</div>
+                    <div class="text-gray-500 flex flex items-end justify-end mr-11 text-xs">${data.username}</div>
                     <div class='flex items-end justify-end'>
                         <div class='flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end '>
                             <div class="attachment_${data.id}">
@@ -331,6 +352,8 @@ $(document).ready(function () {
             }
         })
     })
+
+    /* infinity scroll (sms loader) */
     $('#chat').scroll(function () {
         if ($('#chat').scrollTop() == 0) {
             $.ajax({
@@ -351,24 +374,24 @@ $(document).ready(function () {
                              <li class="send ${r[i].id}">
                                 <div class="chat-message mt-3">
                                     <div class="text-gray-500 text-xs ml-11">${r[i].username}</div>
-                                    <div class="flex items-end">
-                                    <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
-                                    <div class="div-del">
-                                    <div class="group flex flex-row items-center">
-                                        <span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                                            ${r[i].message}
-                                        </span>
-                                   <div  class="ml-2.5 text-red-500">
-                                   <div id="${r[i].id}" class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75"><i class="fa fa-trash-o fa-lg"></i></div>
-                                   </div>
-                                   </div>
-                                   </div>
-                                   </div>
+                                        <div class="flex items-end">
+                                        <div class=" flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 ">
+                                            <div class="div-del">
+                                                <div class="group flex flex-row items-center">
+                                                <span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                                                    ${r[i].message}
+                                                </span>
+                                                   <div  class="ml-2.5 text-red-500">
+                                                        <div id="${r[i].id}" class="delete opacity-0 group-hover:opacity-100 transition-opacity delay-75"><i class="fa fa-trash-o fa-lg"></i></div>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
                                     <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144"
                                          alt="My profile" class="w-6 h-6 rounded-full order-1">
                                     </div>
-                                    </div>
-                                </li>`)
+                                </div>
+                             </li>`)
                         } else {
                             $("#sms").prepend(`
                                 <li class="send ${r[i].id}">

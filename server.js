@@ -11,24 +11,20 @@ io.sockets.on('connect', function (socket) {
     redis.subscribe('chat_app:channel');
 
     redis.on("message", function (channel, data) {
+
         var obj = JSON.parse(data)
         if (obj.event == 'activeUsers') {
             socket.emit('activeUsers', obj);
         }
+        if (obj.event == 'remove') {
+            socket.emit('remove', obj.id);
+        }
+        if (obj.event == 'send') {
+            socket.emit('chat_message', obj);
+        }
+
     });
 
-    socket.on('privateChat',(id) => {
-        redis.on("message", function (channel, data) {
-            var obj = JSON.parse(data)
-
-            if (obj.event == 'remove') {
-                socket.emit('remove', obj.id);
-            }
-            if (obj.event == 'send' ) {
-                socket.emit('chat_message', obj);
-            }
-        })
-    });
     socket.on('disconnect', () =>{
             let newArr = array.filter((e) => {
                 return e!== socket.handshake.query.userId
@@ -36,6 +32,7 @@ io.sockets.on('connect', function (socket) {
             array = newArr;
             io.sockets.emit('ConnectedUserArray',array);
     });
+
     connectedUsers();
 });
 

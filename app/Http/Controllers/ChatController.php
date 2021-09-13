@@ -37,7 +37,7 @@ class ChatController extends Controller
 
         $arr = [];
         $attachments = [];
-        $x = 100;
+        $quality = 100;
         if($request->attachment){
             $message = new Message();
             $message->username = $request->input('user');
@@ -51,12 +51,12 @@ class ChatController extends Controller
                 $save_path = \public_path('img/'.$request->input('user'));
                 if (!file_exists($save_path))
                 {
-                    mkdir($save_path, 777, true);
+                    mkdir($save_path, 755, true);
                 }
                 $img =\Image::make($image)->resize(null, 400, function ($constraint) {
                     $constraint->aspectRatio();
                 });
-                $img->save(\public_path('img/'.$request->input('user').$img_name),$x);
+                $img->save(\public_path('img/'.$request->input('user').$img_name),$quality);
             }
             foreach ($request->attachment as $item) {
                 array_push($arr,$item);
