@@ -1,18 +1,19 @@
 let server = require('http').Server();
 let io = require('socket.io')(server);
 redis = new require('ioredis')();
-var array = [];
+var activeUserArray = [];
 var user;
 
 io.sockets.on('connect', function (socket) {
     console.log('Successfully connected');
     user = socket.handshake.query.userId ;
 
+    connectedUsers();
+
     redis.subscribe('chat_app:channel');
-
     redis.on("message", function (channel, data) {
-
         var obj = JSON.parse(data)
+
         if (obj.event == 'activeUsers') {
             socket.emit('activeUsers', obj);
         }
@@ -22,28 +23,28 @@ io.sockets.on('connect', function (socket) {
         if (obj.event == 'send') {
             socket.emit('chat_message', obj);
         }
-
     });
 
     socket.on('disconnect', () =>{
-            let newArr = array.filter((e) => {
+        console.log('disconnected')
+        /** remove user from array **/
+            let filter = activeUserArray.filter((e) => {
                 return e!== socket.handshake.query.userId
             });
-            array = newArr;
-            io.sockets.emit('ConnectedUserArray',array);
+            activeUserArray = filter;
+            io.sockets.emit('ConnectedUserArray',activeUserArray);
     });
 
-    connectedUsers();
 });
-
 server.listen(3000,() =>{
     console.log('Server started');
 })
+/** create connected user array **/
 function connectedUsers(){
-    if(!array.includes(user)){
-        array.push(user)
+    if(!activeUserArray.includes(user)){
+        activeUserArray.push(user)
     }
-    io.sockets.emit("ConnectedUserArray", array);
+    io.sockets.emit("ConnectedUserArray", activeUserArray);
 }
 
 

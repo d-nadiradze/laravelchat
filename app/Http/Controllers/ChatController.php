@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AttributeRequest;
 use App\Models\Attachment;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,10 +35,11 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request)
     {
-
         $arr = [];
         $attachments = [];
         $quality = 100;
+
+    /** send message with photo */
         if($request->attachment){
             $message = new Message();
             $message->username = $request->input('user');
@@ -76,6 +78,8 @@ class ChatController extends Controller
                 'message_id' => $message->id
             ];
         }
+
+    /** send message without photo  **/
         else if ($request->message && $request->receiver_id != null) {
             $message = new Message();
             $message->username = $request->input('user');
@@ -94,8 +98,10 @@ class ChatController extends Controller
         }
         Redis::publish('channel', json_encode($data));
         return response()->json(['success' => true]);
+
     }
 
+/** fetch messages for infinity scroll */
     public function fetchMessages(Request $request)
     {
         $id = $request->id;
@@ -113,22 +119,41 @@ class ChatController extends Controller
         return $data;
     }
 
+/** remove message for all users */
     public function remove(Request $request)
     {
         $data = ['event' => 'remove', 'id' => $request->id];
         Message::find($request->id)->delete();
         Redis::publish('channel',json_encode($data));
         return response()->json(['success' => true]);
-
     }
 
+/** show all active users  */
     public function activeUsers(Request $request){
-        $users = User::find($request->ids);
+        $id = $request->ids;
+        $users = User::find($id);
+
+        foreach ($users as $user){
+            $user_id = $user->id;
+
+            $message = Message::where(function($query) use($user_id) {
+                $query->where('user_id',$user_id)
+                    ->where('get_by',Auth::id());
+
+            })->orWhere(function($query) use($user_id) {
+                $query->where('user_id', Auth::id())
+                    ->where('get_by', $user_id);
+
+            })->orderByDesc('id')->take(1)->get();
+
+            $user['last_message'] = $message;
+        }
+
         $data = ['event' => 'activeUsers', 'data' => $users];
         Redis::publish('channel',json_encode($data));
-        return view('chat',['receiver' => $request->id]);
     }
 
+/** show private chat */
     public function privateChat(Request $request)
     {
         $id = $request->id;

@@ -16,6 +16,7 @@
 
 </head>
 <body>
+
 <div class=" w-screen h-screen">
     <div class="flex flex-row min-w-full border rounded h-full" style="min-height: 80vh;">
         <div class="user-side z-10 absolute md:relative h-full w-full md:w-1/5  md:block bg-gray-200 md:bg-white border-r border-gray-300">
@@ -62,7 +63,7 @@
     </div>
 </div>
 
-<script src="js/node.js"></script>
+<script src="js/chatApp.js"></script>
 
 </body>
 </html>
